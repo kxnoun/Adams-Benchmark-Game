@@ -29,7 +29,6 @@ class Screen:
         """
         Initialize the Screen.
         """
-        # self.mouse_pos = (-1, 1)
         pygame.init()
 
         self.screen = pygame.display.set_mode(

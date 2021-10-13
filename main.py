@@ -1,6 +1,6 @@
 """
 Adam Kanoun
-This is where the benchmark tests run!
+This is where the benchmark game runs!
 """
 import pygame
 from typing import Tuple

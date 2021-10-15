@@ -9,6 +9,7 @@ import pygame
 class Button:
     """
     A class representing a button in pygame.
+    # TODO: Complete Docstring
     """
     text: str
     text_color: Tuple[int, int, int]
@@ -58,7 +59,8 @@ class Button:
             button_font = pygame.font.Font('freesansbold.ttf', self.font_size)
             text = button_font.render(self.text, True, self.text_color)
             text_rect = text.get_rect()
-            text_rect.center = ((self.x + (self.width / 2)), self.y + (self.height / 2))
+            text_rect.center = ((self.x + (self.width / 2)), self.y +
+                                (self.height / 2))
             screen.blit(text, text_rect)
 
     def draw(self, screen: pygame.Surface) -> None:

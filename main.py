@@ -15,6 +15,7 @@ WHITE = (255, 255, 255)
 GREY = (192, 192, 192)
 LIGHT_YELLOW = (255, 255, 158)
 LIGHT_BROWN = (196, 164, 132)
+DARK_BROWN = (101, 67, 33)
 
 
 class Screen:
@@ -66,6 +67,7 @@ class Screen:
         # Update/Flip the display.
         pygame.display.flip()
 
+    # Create all the buttons
     def create_main_menu_buttons(self) -> None:
         """
         Creates the main menu's buttons.
@@ -83,34 +85,39 @@ class Screen:
                                       (self.SCREEN_WIDTH / 2) + 250,
                                       self.SCREEN_HEIGHT / 3, 250, 250, 30,
                                       "Verbal Memory", BLACK, BLACK)
-        back_button1 = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
+        back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
 
         # Append main_menu's buttons
         self.main_menu_buttons.append(reaction_time_button)
         self.main_menu_buttons.append(number_memory_button)
         self.main_menu_buttons.append(verbal_memory_button)
-        self.main_menu_buttons.append(back_button1)
+        self.main_menu_buttons.append(back_button)
 
     def create_reaction_buttons(self) -> None:
         """
         Creates the reaction game's buttons.
         """
-        # TODO: Complete this method
-        pass
+        reaction_button = Button(LIGHT_BROWN,
+                                 (self.SCREEN_WIDTH / 2) - 500,
+                                 (self.SCREEN_HEIGHT / 4), 1000, 500, 45,
+                                 "Click to Begin!", DARK_BROWN, DARK_BROWN)
+        back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
+        self.reaction_buttons.append(back_button)
+        self.reaction_buttons.append(reaction_button)
 
     def create_number_buttons(self) -> None:
         """
         Creates the number game's buttons
         """
-        # TODO: Complete this method
-        pass
+        back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
+        self.number_buttons.append(back_button)
 
     def create_verbal_buttons(self) -> None:
         """
         Creates the verbal game's buttons
         """
-        # TODO: Complete this method
-        pass
+        back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
+        self.verbal_buttons.append(back_button)
 
     # Helpful methods.
     @staticmethod
@@ -242,22 +249,49 @@ class Screen:
         """
         Draws the reaction game's text.
         """
-        # TODO: Complete this method
-        pass
+        title_font = pygame.font.Font('freesansbold.ttf', 60)
+        text, text_rect = self.text_obj("Reaction Time Test", BLACK,
+                                        title_font)
+        text_rect.center = (self.SCREEN_WIDTH / 2), \
+                           (self.SCREEN_HEIGHT / 12)
+        desc_font = pygame.font.Font('freesansbold.ttf', 20)
+        description = 'As soon as the screen changes color and you see the' \
+                      ' word "Go!", click as fast as you can to find your' \
+                      ' reaction speed.'
+        desc_text, desc_rect = self.text_obj(description, DARK_BROWN,
+                                             desc_font)
+        desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
+        self.screen.blit(text, text_rect)
+        self.screen.blit(desc_text, desc_rect)
 
     def reaction_button_event_handler(self) -> None:
         """
         The event handler for the buttons of the reaction game.
         """
-        # TODO: Complete this method
-        pass
+        for button in self.reaction_buttons:
+            if button.is_hover(pygame.mouse.get_pos()):
+                if button.text == "BACK":
+                    self.reaction_running = False
+                    self.main_running = True
+                else:
+                    # Something may be wrong, so stay on reaction game.
+                    self.reaction_running = True
 
     def draw_reaction_buttons(self) -> None:
         """
         Draws the buttons required for the reaction game.
         """
-        # TODO: Complete this method.
-        pass
+        for button in self.reaction_buttons:
+            orig_button_color = button.color
+            if button.is_hover(pygame.mouse.get_pos()):
+                button.color = (button.color[0] + (255 -
+                                                   button.color[0]) * 0.3,
+                                button.color[1] + (255 -
+                                                   button.color[1]) * 0.3,
+                                button.color[2] + (255 -
+                                                   button.color[2]) * 0.3)
+            button.draw(self.screen)
+            button.color = orig_button_color
 
     def reaction_game(self) -> None:
         """
@@ -269,6 +303,8 @@ class Screen:
             self.draw_reaction_buttons()
             pygame.display.update()
             for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.reaction_button_event_handler()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.reaction_running = False
@@ -282,22 +318,48 @@ class Screen:
         """
         Draws the number game's text.
         """
-        # TODO: Complete this method
-        pass
+        title_font = pygame.font.Font('freesansbold.ttf', 60)
+        text, text_rect = self.text_obj("Number Memory Test", BLACK,
+                                        title_font)
+        text_rect.center = (self.SCREEN_WIDTH / 2), \
+                           (self.SCREEN_HEIGHT / 12)
+        desc_font = pygame.font.Font('freesansbold.ttf', 20)
+        description = 'Try to remember as many digits as possible!' \
+                      ' The numbers of digits increase at every level.'
+        desc_text, desc_rect = self.text_obj(description, DARK_BROWN,
+                                             desc_font)
+        desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
+        self.screen.blit(text, text_rect)
+        self.screen.blit(desc_text, desc_rect)
 
     def number_button_event_handler(self) -> None:
         """
         The event handler for the buttons of the number game.
         """
-        # TODO: Complete this method
-        pass
+        for button in self.number_buttons:
+            if button.is_hover(pygame.mouse.get_pos()):
+                if button.text == "BACK":
+                    self.number_running = False
+                    self.main_running = True
+                else:
+                    # Something may be wrong, so stay on reaction game.
+                    self.number_running = True
 
     def draw_number_buttons(self) -> None:
         """
         Draws the buttons required for the number game.
         """
-        # TODO: Complete this method.
-        pass
+        for button in self.number_buttons:
+            orig_button_color = button.color
+            if button.is_hover(pygame.mouse.get_pos()):
+                button.color = (button.color[0] + (255 -
+                                                   button.color[0]) * 0.3,
+                                button.color[1] + (255 -
+                                                   button.color[1]) * 0.3,
+                                button.color[2] + (255 -
+                                                   button.color[2]) * 0.3)
+            button.draw(self.screen)
+            button.color = orig_button_color
 
     def number_game(self) -> None:
         """
@@ -309,6 +371,8 @@ class Screen:
             self.draw_number_buttons()
             pygame.display.update()
             for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.number_button_event_handler()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.number_running = False
@@ -322,22 +386,48 @@ class Screen:
         """
         Draws the verbal game's text.
         """
-        # TODO: Complete this method
-        pass
+        title_font = pygame.font.Font('freesansbold.ttf', 60)
+        text, text_rect = self.text_obj("Verbal Memory Test", BLACK,
+                                        title_font)
+        text_rect.center = (self.SCREEN_WIDTH / 2), \
+                           (self.SCREEN_HEIGHT / 12)
+        desc_font = pygame.font.Font('freesansbold.ttf', 20)
+        description = 'Words will be shown once at a time, if the word' \
+                      ' has been shown, click "shown", and if not, click "new".'
+        desc_text, desc_rect = self.text_obj(description, DARK_BROWN,
+                                             desc_font)
+        desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
+        self.screen.blit(text, text_rect)
+        self.screen.blit(desc_text, desc_rect)
 
     def verbal_button_event_handler(self) -> None:
         """
         The event handler for the buttons of the verbal game.
         """
-        # TODO: Complete this method
-        pass
+        for button in self.verbal_buttons:
+            if button.is_hover(pygame.mouse.get_pos()):
+                if button.text == "BACK":
+                    self.verbal_running = False
+                    self.main_running = True
+                else:
+                    # Something may be wrong, so stay on reaction game.
+                    self.verbal_running = True
 
     def draw_verbal_buttons(self) -> None:
         """
         Draws the buttons required for the verbal game.
         """
-        # TODO: Complete this method.
-        pass
+        for button in self.verbal_buttons:
+            orig_button_color = button.color
+            if button.is_hover(pygame.mouse.get_pos()):
+                button.color = (button.color[0] + (255 -
+                                                   button.color[0]) * 0.3,
+                                button.color[1] + (255 -
+                                                   button.color[1]) * 0.3,
+                                button.color[2] + (255 -
+                                                   button.color[2]) * 0.3)
+            button.draw(self.screen)
+            button.color = orig_button_color
 
     def verbal_game(self) -> None:
         """
@@ -349,6 +439,8 @@ class Screen:
             self.draw_verbal_buttons()
             pygame.display.update()
             for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.verbal_button_event_handler()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.verbal_running = False

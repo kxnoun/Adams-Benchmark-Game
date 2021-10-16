@@ -5,6 +5,7 @@ This is where the benchmark game runs!
 import pygame
 from typing import Tuple, List
 from Button import Button
+from verbal_game import VerbalGame
 
 # COLOR CONSTANTS
 BLUE = (0, 0, 255)
@@ -16,6 +17,9 @@ GREY = (192, 192, 192)
 LIGHT_YELLOW = (255, 255, 158)
 LIGHT_BROWN = (196, 164, 132)
 DARK_BROWN = (101, 67, 33)
+DARK_BLUE = (20, 52, 164)
+JADE = (0, 163, 108)
+ALT_RED = (245, 31, 10)
 
 
 class Screen:
@@ -38,8 +42,7 @@ class Screen:
     verbal_running: bool = False
     main_menu_buttons: List[Button]
     reaction_buttons: List[Button]
-    number_buttons: List[Button]
-    verbal_buttons: List[Button]
+    words: VerbalGame = VerbalGame()
 
     # INITIALIZER
     def __init__(self) -> None:
@@ -116,8 +119,16 @@ class Screen:
         """
         Creates the verbal game's buttons
         """
+        shown_button = Button(DARK_BLUE, self.SCREEN_WIDTH / 13,
+                              self.SCREEN_HEIGHT / 1.7, 225, 75, 30, "Shown",
+                              WHITE, WHITE)
+        new_button = Button(JADE, self.SCREEN_WIDTH / 13,
+                            self.SCREEN_HEIGHT / 3, 225, 75, 30,
+                            "New", WHITE, WHITE)
         back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
         self.verbal_buttons.append(back_button)
+        self.verbal_buttons.append(shown_button)
+        self.verbal_buttons.append(new_button)
 
     # Helpful methods.
     @staticmethod
@@ -397,8 +408,24 @@ class Screen:
         desc_text, desc_rect = self.text_obj(description, DARK_BROWN,
                                              desc_font)
         desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
+        word_font = pygame.font.Font('freesansbold.ttf', 60)
+        word_text, word_rect = self.text_obj(self.words.curr_word, BLACK, word_font)
+        word_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2)
+        point_font = pygame.font.Font('freesansbold.ttf', 40)
+        point_text, point_rect = self.text_obj("Score", ALT_RED, word_font)
+        point_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 3.2)
+        pygame.draw.line(self.screen, ALT_RED,
+                         (self.SCREEN_WIDTH / 1.3, self.SCREEN_HEIGHT / 2.83),
+                         (self.SCREEN_WIDTH / 1.1, self.SCREEN_HEIGHT / 2.83),
+                         3)
+        num_font = pygame.font.Font('freesansbold.ttf', 70)
+        num_text, num_rect = self.text_obj(str(self.words.points), ALT_RED, num_font)
+        num_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 2.1)
         self.screen.blit(text, text_rect)
         self.screen.blit(desc_text, desc_rect)
+        self.screen.blit(word_text, word_rect)
+        self.screen.blit(point_text, point_rect)
+        self.screen.blit(num_text, num_rect)
 
     def verbal_button_event_handler(self) -> None:
         """
@@ -409,6 +436,8 @@ class Screen:
                 if button.text == "BACK":
                     self.verbal_running = False
                     self.main_running = True
+                elif button.text == "New" or button.text == "Shown":
+                    self.words.answer(button.text)
                 else:
                     # Something may be wrong, so stay on reaction game.
                     self.verbal_running = True
@@ -433,6 +462,7 @@ class Screen:
         """
         Runs the verbal memory benchmark/game.
         """
+        self.words.setup()
         while self.verbal_running and self.game_running:
             self.draw_background()
             self.draw_verbal_text()

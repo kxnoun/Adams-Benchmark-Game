@@ -3,9 +3,11 @@ Adam Kanoun
 This is where the benchmark game runs!
 """
 import pygame
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from Button import Button
-from verbal_game import VerbalGame
+from VerbalGame import VerbalGame
+from NumberGame import NumberGame
+import time
 
 # COLOR CONSTANTS
 BLUE = (0, 0, 255)
@@ -14,12 +16,16 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (192, 192, 192)
+DARK_GREY = (105, 105, 105)
 LIGHT_YELLOW = (255, 255, 158)
 LIGHT_BROWN = (196, 164, 132)
 DARK_BROWN = (101, 67, 33)
 DARK_BLUE = (20, 52, 164)
 JADE = (0, 163, 108)
 ALT_RED = (245, 31, 10)
+
+# FONTS
+SANS_FONT = 'freesansbold.ttf'
 
 
 class Screen:
@@ -42,7 +48,14 @@ class Screen:
     verbal_running: bool = False
     main_menu_buttons: List[Button]
     reaction_buttons: List[Button]
+    number_buttons: List[Button]
+    verbal_buttons: List[Button]
     words: VerbalGame = VerbalGame()
+    clicked_textbox: bool = False
+    textbox: Button
+    numbers: NumberGame = NumberGame()
+    start_time: int = 0
+    can_type: bool = True
 
     # INITIALIZER
     def __init__(self) -> None:
@@ -112,8 +125,14 @@ class Screen:
         """
         Creates the number game's buttons
         """
+        input_rect = Button(WHITE, self.SCREEN_WIDTH / 2 - 600,
+                            self.SCREEN_HEIGHT / 1.5, 1200, 100, 40,
+                            'Write "start" and press enter to begin!',
+                            DARK_GREY)
         back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
+        self.textbox = input_rect
         self.number_buttons.append(back_button)
+        self.number_buttons.append(input_rect)
 
     def create_verbal_buttons(self) -> None:
         """
@@ -151,8 +170,8 @@ class Screen:
         A helper method for game_intro.
         This method draws the text and background for the game intro.
         """
-        intro_font = pygame.font.Font('freesansbold.ttf', 100)
-        sub_font = pygame.font.Font('freesansbold.ttf', 35)
+        intro_font = pygame.font.Font(SANS_FONT, 100)
+        sub_font = pygame.font.Font(SANS_FONT, 35)
         text, text_rect = self.text_obj("Adam's Benchmark Tests", BLACK,
                                         intro_font)
         subtext, subtext_rect = self.text_obj("Press Any Key to Begin", GREY,
@@ -192,7 +211,7 @@ class Screen:
         """
         Draws the main menu text
         """
-        main_menu_font = pygame.font.Font('freesansbold.ttf', 60)
+        main_menu_font = pygame.font.Font(SANS_FONT, 60)
         text, text_rect = self.text_obj("Choose any game!", BLACK,
                                         main_menu_font)
         text_rect.center = (self.SCREEN_WIDTH / 2), \
@@ -260,12 +279,12 @@ class Screen:
         """
         Draws the reaction game's text.
         """
-        title_font = pygame.font.Font('freesansbold.ttf', 60)
+        title_font = pygame.font.Font(SANS_FONT, 60)
         text, text_rect = self.text_obj("Reaction Time Test", BLACK,
                                         title_font)
         text_rect.center = (self.SCREEN_WIDTH / 2), \
                            (self.SCREEN_HEIGHT / 12)
-        desc_font = pygame.font.Font('freesansbold.ttf', 20)
+        desc_font = pygame.font.Font(SANS_FONT, 20)
         description = 'As soon as the screen changes color and you see the' \
                       ' word "Go!", click as fast as you can to find your' \
                       ' reaction speed.'
@@ -329,17 +348,38 @@ class Screen:
         """
         Draws the number game's text.
         """
-        title_font = pygame.font.Font('freesansbold.ttf', 60)
+        title_font = pygame.font.Font(SANS_FONT, 60)
         text, text_rect = self.text_obj("Number Memory Test", BLACK,
                                         title_font)
         text_rect.center = (self.SCREEN_WIDTH / 2), \
                            (self.SCREEN_HEIGHT / 12)
-        desc_font = pygame.font.Font('freesansbold.ttf', 20)
+        desc_font = pygame.font.Font(SANS_FONT, 20)
         description = 'Try to remember as many digits as possible!' \
                       ' The numbers of digits increase at every level.'
         desc_text, desc_rect = self.text_obj(description, DARK_BROWN,
                                              desc_font)
         desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
+        if self.numbers.begin is True:
+            point_text, point_rect = self.text_obj("Score", ALT_RED, title_font)
+            point_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 4)
+            pygame.draw.line(self.screen, ALT_RED,
+                             (self.SCREEN_WIDTH / 1.3, self.SCREEN_HEIGHT / 3.4),
+                             (self.SCREEN_WIDTH / 1.1, self.SCREEN_HEIGHT / 3.4),
+                             3)
+            num_font = pygame.font.Font(SANS_FONT, 70)
+            num_text, num_rect = self.text_obj(str(self.numbers.points), ALT_RED,
+                                               num_font)
+            num_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 2.7)
+            self.screen.blit(point_text, point_rect)
+            self.screen.blit(num_text, num_rect)
+        if time.time() - self.start_time < self.numbers.time_on_screen:
+            self.can_type = False
+            number_font = pygame.font.Font(SANS_FONT, 60)
+            number, number_rect = self.text_obj(self.numbers.curr_num, BLACK, number_font)
+            number_rect.center = (self.SCREEN_WIDTH / 2), (self.SCREEN_HEIGHT / 2)
+            self.screen.blit(number, number_rect)
+        else:
+            self.can_type = True
         self.screen.blit(text, text_rect)
         self.screen.blit(desc_text, desc_rect)
 
@@ -352,9 +392,27 @@ class Screen:
                 if button.text == "BACK":
                     self.number_running = False
                     self.main_running = True
+                elif button == self.textbox:
+                    self.textbox.outline = BLUE
+                    self.clicked_textbox = True
+                    self.textbox.font_size = 50
+                    self.textbox.text = ""
+                    self.textbox.text_color = BLACK
                 else:
                     # Something may be wrong, so stay on reaction game.
                     self.number_running = True
+            else:
+                if self.clicked_textbox is False and self.numbers.begin is False:
+                    self.textbox.text_color = DARK_GREY
+                    self.textbox.font_size = 40
+                    self.textbox.text = \
+                        'Write "start" and press enter to begin!'
+                elif self.clicked_textbox is False and self.numbers.begin:
+                    self.textbox.text_color = DARK_GREY
+                    self.textbox.font_size = 40
+                    self.textbox.text = \
+                        'Write the number here!'
+                self.clicked_textbox = False
 
     def draw_number_buttons(self) -> None:
         """
@@ -369,6 +427,11 @@ class Screen:
                                                    button.color[1]) * 0.3,
                                 button.color[2] + (255 -
                                                    button.color[2]) * 0.3)
+            if button.color == WHITE and \
+                    button.is_hover(pygame.mouse.get_pos()):
+                button.outline = BLUE
+            elif button.color == WHITE and self.clicked_textbox is False:
+                button.outline = None
             button.draw(self.screen)
             button.color = orig_button_color
 
@@ -376,6 +439,13 @@ class Screen:
         """
         Runs the number memory benchmark/game.
         """
+        self.numbers.setup()
+        self.start_time = 0
+        self.textbox.text_color = DARK_GREY
+        self.textbox.font_size = 40
+        self.textbox.text = 'Write "start" and press enter to begin!'
+        self.clicked_textbox = False
+        self.can_type = True
         while self.number_running and self.game_running:
             self.draw_background()
             self.draw_number_text()
@@ -388,6 +458,32 @@ class Screen:
                     if event.key == pygame.K_ESCAPE:
                         self.number_running = False
                         self.game_running = False
+                    elif event.key == pygame.K_BACKSPACE and \
+                            self.clicked_textbox:
+                        self.textbox.text = self.textbox.text[:-1]
+                    elif event.key == pygame.K_RETURN and self.clicked_textbox and self.numbers.begin is False:
+                        if self.textbox.text.lower() == "start":
+                            self.start_time = time.time()
+                            self.textbox.text = ""
+                            self.numbers.begin = True
+                            self.can_type = False
+                    elif event.key == pygame.K_RETURN and self.clicked_textbox and self.numbers.begin is True:
+                        if self.textbox.text.strip().isnumeric():
+                            temp = self.textbox.text
+                            if self.numbers.is_correct(self.textbox.text.strip()):
+                                self.start_time = time.time()
+                                self.textbox.text = ""
+                            else:
+                                self.start_time = 0
+                                self.textbox.text_color = DARK_GREY
+                                self.textbox.font_size = 40
+                                self.clicked_textbox = False
+                                self.textbox.text = 'Click again and write "start"'
+                                self.can_type = True
+                            self.numbers.answer(temp.strip())
+                    else:
+                        if self.clicked_textbox and self.can_type:
+                            self.textbox.text += event.unicode
                 if event.type == pygame.QUIT:
                     self.number_running = False
                     self.game_running = False
@@ -397,29 +493,31 @@ class Screen:
         """
         Draws the verbal game's text.
         """
-        title_font = pygame.font.Font('freesansbold.ttf', 60)
+        title_font = pygame.font.Font(SANS_FONT, 60)
         text, text_rect = self.text_obj("Verbal Memory Test", BLACK,
                                         title_font)
         text_rect.center = (self.SCREEN_WIDTH / 2), \
                            (self.SCREEN_HEIGHT / 12)
-        desc_font = pygame.font.Font('freesansbold.ttf', 20)
+        desc_font = pygame.font.Font(SANS_FONT, 20)
         description = 'Words will be shown once at a time, if the word' \
                       ' has been shown, click "shown", and if not, click "new".'
         desc_text, desc_rect = self.text_obj(description, DARK_BROWN,
                                              desc_font)
         desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
-        word_font = pygame.font.Font('freesansbold.ttf', 60)
-        word_text, word_rect = self.text_obj(self.words.curr_word, BLACK, word_font)
+        word_font = pygame.font.Font(SANS_FONT, 60)
+        word_text, word_rect = self.text_obj(self.words.curr_word, BLACK,
+                                             word_font)
         word_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2)
-        point_font = pygame.font.Font('freesansbold.ttf', 40)
+        point_font = pygame.font.Font(SANS_FONT, 40)
         point_text, point_rect = self.text_obj("Score", ALT_RED, word_font)
         point_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 3.2)
         pygame.draw.line(self.screen, ALT_RED,
                          (self.SCREEN_WIDTH / 1.3, self.SCREEN_HEIGHT / 2.83),
                          (self.SCREEN_WIDTH / 1.1, self.SCREEN_HEIGHT / 2.83),
                          3)
-        num_font = pygame.font.Font('freesansbold.ttf', 70)
-        num_text, num_rect = self.text_obj(str(self.words.points), ALT_RED, num_font)
+        num_font = pygame.font.Font(SANS_FONT, 70)
+        num_text, num_rect = self.text_obj(str(self.words.points), ALT_RED,
+                                           num_font)
         num_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 2.1)
         self.screen.blit(text, text_rect)
         self.screen.blit(desc_text, desc_rect)

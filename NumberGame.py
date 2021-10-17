@@ -1,3 +1,8 @@
+"""
+    File name: NumberGame.py
+    Author: Adam Kanoun
+    Python Version: 3.9
+"""
 import random
 
 

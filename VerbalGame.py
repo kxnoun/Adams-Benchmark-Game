@@ -1,3 +1,9 @@
+"""
+    File name: VerbalGame.py
+    Author: Adam Kanoun
+    Python Version: 3.9
+"""
+
 import random
 from typing import List, Set, Optional
 
@@ -66,7 +72,7 @@ class VerbalGame:
         Make self.curr_word either new word or an already seen word.
         """
         temp = random.choice(self.words_shown)
-        if random.randint(1, 4) == 3 and len(self.words_shown) > 0 and \
+        if random.randint(1, 2) == 2 and len(self.words_shown) > 0 and \
                 temp != self.curr_word:
             self.curr_word = temp
         else:

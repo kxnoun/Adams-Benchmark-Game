@@ -1,6 +1,7 @@
 """
-Adam Kanoun
-This is where everything related to class Button is stored.
+    File name: Button.py
+    Author: Adam Kanoun
+    Python Version: 3.9
 """
 from typing import Tuple, Optional, Union
 import pygame

@@ -3,7 +3,6 @@
     Author: Adam Kanoun
     Python Version: 3.9
 """
-
 import random
 from typing import List, Set, Optional
 
@@ -18,7 +17,10 @@ class VerbalGame:
     points: int = 0
     curr_word: str
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Initialize VerbalGame.
+        """
         self.load_random_words()
 
     def load_random_words(self) -> None:

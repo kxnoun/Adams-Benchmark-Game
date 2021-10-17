@@ -4,11 +4,12 @@
     Python Version: 3.9
 """
 import pygame
+import time
 from typing import Tuple, List, Optional
 from Button import Button
-from VerbalGame import VerbalGame
+from ReactionGame import ReactionGame
 from NumberGame import NumberGame
-import time
+from VerbalGame import VerbalGame
 
 # COLOR CONSTANTS
 BLUE = (0, 0, 255)
@@ -24,6 +25,7 @@ DARK_BROWN = (101, 67, 33)
 DARK_BLUE = (20, 52, 164)
 JADE = (0, 163, 108)
 ALT_RED = (245, 31, 10)
+ORANGE = (255, 165, 0)
 
 # FONTS
 SANS_FONT = 'freesansbold.ttf'
@@ -57,6 +59,8 @@ class Screen:
     numbers: NumberGame = NumberGame()
     start_time: int = 0
     can_type: bool = True
+    react: ReactionGame = ReactionGame()
+    react_button: Button
 
     # INITIALIZER
     def __init__(self) -> None:
@@ -119,6 +123,7 @@ class Screen:
                                  (self.SCREEN_HEIGHT / 4), 1000, 500, 45,
                                  "Click to Begin!", DARK_BROWN, DARK_BROWN)
         back_button = Button(BLACK, 15, 20, 100, 30, 20, "BACK", WHITE, WHITE)
+        self.react_button = reaction_button
         self.reaction_buttons.append(back_button)
         self.reaction_buttons.append(reaction_button)
 
@@ -304,6 +309,24 @@ class Screen:
                 if button.text == "BACK":
                     self.reaction_running = False
                     self.main_running = True
+                elif button == self.react_button:
+                    if self.react.start is False and self.react.failed:
+                        self.react.setup()
+                    elif self.react.start is False:
+                        self.react_button.color = ALT_RED
+                        self.react_button.outline = RED
+                        self.react_button.text_color = WHITE
+                        self.react_button.font_size = 70
+                        self.react_button.text = "Wait!"
+                        self.react.start = True
+                        self.start_time = time.time()
+                    elif time.time() - self.start_time < self.react.wait_time:
+                        self.react.failed = True
+                        self.react.start = False
+                    elif time.time() - self.start_time > self.react.wait_time:
+                        self.react.reaction_speed = time.time() - self.start_time - self.react.wait_time
+                        self.react_button.text = str(int(self.react.reaction_speed * 1000)) + " ms"
+                        self.react.start = False
                 else:
                     # Something may be wrong, so stay on reaction game.
                     self.reaction_running = True
@@ -313,6 +336,16 @@ class Screen:
         Draws the buttons required for the reaction game.
         """
         for button in self.reaction_buttons:
+            if time.time() - self.start_time >= self.react.wait_time and self.react.start:
+                if button == self.react_button:
+                    self.react_button.color = JADE
+                    self.react_button.text = "GO!"
+                    self.react_button.outline = GREEN
+            elif self.react.failed is True:
+                self.react_button.text = "Woah! Try again!"
+                self.react_button.color = ORANGE
+                self.react_button.outline = ORANGE
+                self.react_button.text_color = RED
             orig_button_color = button.color
             if button.is_hover(pygame.mouse.get_pos()):
                 button.color = (button.color[0] + (255 -
@@ -328,6 +361,12 @@ class Screen:
         """
         Runs the reaction time benchmark/game.
         """
+        self.react.setup()
+        self.react_button.text = "Click to Begin!"
+        self.react_button.font_size = 45
+        self.react_button.outline = DARK_BROWN
+        self.react_button.color = LIGHT_BROWN
+        self.react_button.text_color = DARK_BROWN
         while self.reaction_running and self.game_running:
             self.draw_background()
             self.draw_reaction_text()

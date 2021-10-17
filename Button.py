@@ -10,7 +10,22 @@ import pygame
 class Button:
     """
     A class representing a button in pygame.
-    # TODO: Complete Docstring
+    === Public Attributes ===
+    text: The text that is displayed on the button.
+    text_color: The color of the text on the button in RGB.
+    font_size: A number representing the size of the font.
+    color: The color of the button (not including the outline) in RGB.
+    x: The horizontal position of the button (the x in an (x, y) co-ordinate).
+    y: The vertical position of the button (the y in an (x, y) co-ordinate).
+    width: A number representing width of the button.
+    height: A number representing the height of the button.
+    outline: A variable representing the color of the button's outline in RGB.
+        Keep in mind, if outline is None, there is no outline.
+
+    === Representation Invariants ===
+    font_size > 0
+    x, y >= 0
+    width, height > 0
     """
     text: str
     text_color: Tuple[int, int, int]
@@ -20,6 +35,7 @@ class Button:
     y: Union[int, float]
     width: Union[int, float]
     height: Union[int, float]
+    outline: Optional[Tuple[int, int, int]]
 
     def __init__(self, color: Tuple[int, int, int], x: Union[int, float],
                  y: Union[int, float], width: Union[int, float],
@@ -28,6 +44,11 @@ class Button:
                  outline: Optional[Tuple[int, int, int]] = None) -> None:
         """
         Initialize a button.
+        Preconditions:
+            color, text_color, outline are in RGB.
+            font_size > 0
+            x, y >= 0
+            width, height > 0
         """
         self.text = text
         self.text_color = text_color
@@ -47,8 +68,8 @@ class Button:
             # Draw a rectangle with color <outline> that is bigger than width
             # and height, to make it seem like it is an outline.
             pygame.draw.rect(screen, self.outline, (self.x - 2, self.y - 2,
-                                               self.width + 4,
-                                               self.height + 4), 0)
+                                                    self.width + 4,
+                                                    self.height + 4), 0)
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.width,
                                               self.height), 0)
 
@@ -65,6 +86,9 @@ class Button:
             screen.blit(text, text_rect)
 
     def draw(self, screen: pygame.Surface) -> None:
+        """
+        # TODO: Complete docstring
+        """
         self.draw_button(screen)
         self.draw_text(screen)
 

@@ -5,7 +5,7 @@
 """
 import pygame
 import time
-from typing import Tuple, List, Optional
+from typing import Tuple, List
 from Button import Button
 from ReactionGame import ReactionGame
 from NumberGame import NumberGame
@@ -34,14 +34,58 @@ SANS_FONT = 'freesansbold.ttf'
 class Screen:
     """
     The main screen for the game.
+
+    === Public Attributes ===
+    SCREEN_WIDTH: The width of the screen in pixels.
+    SCREEN_HEIGHT: The height of the screen in pixels.
+    BACKGROUND: The color of the background in RBG.
+    screen: The display of the game.
+    game_running: A boolean representing whether or not the main game loop is
+        running.
+    intro_running: A boolean representing whether or not the game introduction
+        scene is running.
+    main_running: A boolean representing whether or not the main menu screen
+        is running.
+    reaction_running: A boolean representing whether or not the reaction game
+        is running.
+    number_running: A boolean representing whether or not the number game
+        is running.
+    verbal_running: A boolean representing whether or not the verbal game
+        is running.
+    main_menu_buttons: A list of all the buttons in the main menu.
+    reaction_buttons: A list of all the buttons in the reaction game.
+    number_buttons: A list of all the buttons in the number game.
+    verbal_buttons: A list of all the buttons in the verbal game.
+    words: An attribute that runs the VerbalGame class and has vital attributes
+        and methods for the verbal game to work.
+    clicked_textbox: Represents whether the text box in the verbal game has
+        been clicked.
+    textbox: Represents the text box in the verbal game.
+    numbers: An attribute that runs the NumberGame class and has vital
+        attributes and methods for the number game to work.
+    can_type: Represents whether or not the user can type on the textbox.
+    react: An attribute that runs the ReactGame class and has vital attributes
+        and methods for the react game to work.
+    react_button: Represents the main button in the reaction game.
+
+    === Private Attributes ===
+    _start_time: Used in both the number game and the reaction game, this
+        attribute represents a necessary start time. For the number game, this
+        is used to calculate how long the displayed number should be shown.
+        For the reaction game, this is used to calculate everything after
+        the first click to start the game.
+
     === Representation Invariants ===
         Exactly one of the following attributes may be True at a time.
         intro_running, main_running, reaction_running, number_running,
         verbal_running.
-    # TODO: Complete DOCSTRING
+
+        SCREEN_WIDTH, SCREEN_HEIGHT > 0
+        _start_time >= 0
     """
     SCREEN_WIDTH: int = 1280
     SCREEN_HEIGHT: int = 720
+    screen: pygame.Surface
     BACKGROUND: Tuple[int, int, int] = LIGHT_YELLOW
     game_running: bool = True
     intro_running: bool = True
@@ -57,7 +101,7 @@ class Screen:
     clicked_textbox: bool = False
     textbox: Button
     numbers: NumberGame = NumberGame()
-    start_time: int = 0
+    _start_time: float = 0
     can_type: bool = True
     react: ReactionGame = ReactionGame()
     react_button: Button
@@ -319,13 +363,16 @@ class Screen:
                         self.react_button.font_size = 70
                         self.react_button.text = "Wait!"
                         self.react.start = True
-                        self.start_time = time.time()
-                    elif time.time() - self.start_time < self.react.wait_time:
+                        self._start_time = time.time()
+                    elif time.time() - self._start_time < self.react.wait_time:
                         self.react.failed = True
                         self.react.start = False
-                    elif time.time() - self.start_time > self.react.wait_time:
-                        self.react.reaction_speed = time.time() - self.start_time - self.react.wait_time
-                        self.react_button.text = str(int(self.react.reaction_speed * 1000)) + " ms"
+                    elif time.time() - self._start_time > self.react.wait_time:
+                        self.react.reaction_speed = time.time() - \
+                                                    self._start_time - \
+                                                    self.react.wait_time
+                        self.react_button.text = \
+                            str(int(self.react.reaction_speed * 1000)) + " ms"
                         self.react.start = False
                 else:
                     # Something may be wrong, so stay on reaction game.
@@ -336,7 +383,8 @@ class Screen:
         Draws the buttons required for the reaction game.
         """
         for button in self.reaction_buttons:
-            if time.time() - self.start_time >= self.react.wait_time and self.react.start:
+            if time.time() - self._start_time >= self.react.wait_time and \
+                    self.react.start:
                 if button == self.react_button:
                     self.react_button.color = JADE
                     self.react_button.text = "GO!"
@@ -401,22 +449,28 @@ class Screen:
         desc_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 6)
         if self.numbers.begin is True:
             point_text, point_rect = self.text_obj("Score", ALT_RED, title_font)
-            point_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 4)
+            point_rect.center = \
+                (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 4)
             pygame.draw.line(self.screen, ALT_RED,
-                             (self.SCREEN_WIDTH / 1.3, self.SCREEN_HEIGHT / 3.4),
-                             (self.SCREEN_WIDTH / 1.1, self.SCREEN_HEIGHT / 3.4),
+                             (self.SCREEN_WIDTH / 1.3,
+                              self.SCREEN_HEIGHT / 3.4),
+                             (self.SCREEN_WIDTH / 1.1,
+                              self.SCREEN_HEIGHT / 3.4),
                              3)
             num_font = pygame.font.Font(SANS_FONT, 70)
-            num_text, num_rect = self.text_obj(str(self.numbers.points), ALT_RED,
-                                               num_font)
-            num_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 2.7)
+            num_text, num_rect = self.text_obj(str(self.numbers.points),
+                                               ALT_RED, num_font)
+            num_rect.center = \
+                (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 2.7)
             self.screen.blit(point_text, point_rect)
             self.screen.blit(num_text, num_rect)
-        if time.time() - self.start_time < self.numbers.time_on_screen:
+        if time.time() - self._start_time < self.numbers.time_on_screen:
             self.can_type = False
             number_font = pygame.font.Font(SANS_FONT, 60)
-            number, number_rect = self.text_obj(self.numbers.curr_num, BLACK, number_font)
-            number_rect.center = (self.SCREEN_WIDTH / 2), (self.SCREEN_HEIGHT / 2)
+            number, number_rect = \
+                self.text_obj(self.numbers.curr_num, BLACK, number_font)
+            number_rect.center = \
+                (self.SCREEN_WIDTH / 2), (self.SCREEN_HEIGHT / 2)
             self.screen.blit(number, number_rect)
         else:
             self.can_type = True
@@ -442,7 +496,8 @@ class Screen:
                     # Something may be wrong, so stay on reaction game.
                     self.number_running = True
             else:
-                if self.clicked_textbox is False and self.numbers.begin is False:
+                if self.clicked_textbox is False \
+                        and self.numbers.begin is False:
                     self.textbox.text_color = DARK_GREY
                     self.textbox.font_size = 40
                     self.textbox.text = \
@@ -480,7 +535,7 @@ class Screen:
         Runs the number memory benchmark/game.
         """
         self.numbers.setup()
-        self.start_time = 0
+        self._start_time = 0
         self.textbox.text_color = DARK_GREY
         self.textbox.font_size = 40
         self.textbox.text = 'Write "start" and press enter to begin!'
@@ -501,24 +556,28 @@ class Screen:
                     elif event.key == pygame.K_BACKSPACE and \
                             self.clicked_textbox:
                         self.textbox.text = self.textbox.text[:-1]
-                    elif event.key == pygame.K_RETURN and self.clicked_textbox and self.numbers.begin is False:
+                    elif event.key == pygame.K_RETURN and self.clicked_textbox \
+                            and self.numbers.begin is False:
                         if self.textbox.text.lower() == "start":
-                            self.start_time = time.time()
+                            self._start_time = time.time()
                             self.textbox.text = ""
                             self.numbers.begin = True
                             self.can_type = False
-                    elif event.key == pygame.K_RETURN and self.clicked_textbox and self.numbers.begin is True:
+                    elif event.key == pygame.K_RETURN and self.clicked_textbox \
+                            and self.numbers.begin is True:
                         if self.textbox.text.strip().isnumeric():
                             temp = self.textbox.text
-                            if self.numbers.is_correct(self.textbox.text.strip()):
-                                self.start_time = time.time()
+                            if self.numbers.is_correct(
+                                    self.textbox.text.strip()):
+                                self._start_time = time.time()
                                 self.textbox.text = ""
                             else:
-                                self.start_time = 0
+                                self._start_time = 0
                                 self.textbox.text_color = DARK_GREY
                                 self.textbox.font_size = 40
                                 self.clicked_textbox = False
-                                self.textbox.text = 'Click again and write "start"'
+                                self.textbox.text = \
+                                    'Click again and write "start"'
                                 self.can_type = True
                             self.numbers.answer(temp.strip())
                     else:
@@ -548,7 +607,6 @@ class Screen:
         word_text, word_rect = self.text_obj(self.words.curr_word, BLACK,
                                              word_font)
         word_rect.center = (self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2)
-        point_font = pygame.font.Font(SANS_FONT, 40)
         point_text, point_rect = self.text_obj("Score", ALT_RED, word_font)
         point_rect.center = (self.SCREEN_WIDTH / 1.19, self.SCREEN_HEIGHT / 3.2)
         pygame.draw.line(self.screen, ALT_RED,

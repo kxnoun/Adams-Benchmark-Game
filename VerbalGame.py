@@ -4,12 +4,23 @@
     Python Version: 3.9
 """
 import random
-from typing import List, Set, Optional
+from typing import List
 
 
 class VerbalGame:
     """
     A class representing the verbal game's inner workings.
+    === Public Attributes ===
+    words: A list of all the words from words.txt
+    game_words: A list of 1000 random words from words
+    words_shown: All the words that have already been shown to the user.
+    points: The number of answers the user has gotten correctly.
+    curr_word: The word being currently displayed on screen.
+
+    === Representation Invariants ===
+    len(game_words) must always be equal to 1000.
+    0 < len(words_shown) <= len(game_words) < len(words)
+    points >= 0
     """
     words: List[str]
     game_words: List[str]

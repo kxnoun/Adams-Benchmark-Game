@@ -9,6 +9,19 @@ import random
 class NumberGame:
     """
     A class representing the internal workings of the number memory game.
+    === Public Attributes ===
+    points: The number of answers the user has gotten correct.
+    curr_num: The current number displayed on screen.
+    lower_bound: The smallest number that should be tested this round.
+    time_on_screen: The amount of time that the number will be displayed on
+        screen (in seconds).
+    begin: Represents whether or not the game has begun.
+
+    === Representation Invariants ===
+    points > 0
+    lower_bound >= 1
+    lower_bound  must be a multiple of 10
+    time_on_screen > 0
     """
     points: int = 0
     curr_num: str
@@ -16,7 +29,7 @@ class NumberGame:
     time_on_screen: float = 1.7
     begin: bool = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the NumberGame class
         """

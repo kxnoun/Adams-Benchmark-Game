@@ -1,6 +1,6 @@
 # Adam's Benchmark Game
 ## Introduction
-Hello, I'm Adam! Thank you for taking your time to read this. I've wanted to create my own personal project for quite a while now, but studies has kept me very busy for quite a while. Finally I have created my first ever personal project. For the past year, I have had many university projects that required me to make simple games using both Python and Java, so I decided to make my own during my reading week.
+Hello, I'm Adam! Thank you for taking your time to read this. I've wanted to create my own personal project for quite a while now, but studies has kept me very busy. Finally I have created my first ever personal project. For the past year, I have had many university projects that required me to make simple games using both Python and Java, so I decided to make my own during my reading week.
 
 **This project is the first step in my journey to discovering myself in the world of programming and computer science!**
 

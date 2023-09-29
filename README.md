@@ -50,8 +50,6 @@ The game is a trio of minigames:
 ## 💡 Inspiration
 This entire game draws inspiration from [Human Benchmark.](https://humanbenchmark.com/)
 
-The entire game draws inspiration from [Human Benchmark.](https://humanbenchmark.com/) 
-
 One day, while benchmarking my human skills with friends, a thought struck - could I recreate these minigames? Writing down ideas and leveraging my Python skills, I found pockets of time and brought this game to life. 🌟
 
 Enjoy! 😁
